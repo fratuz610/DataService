@@ -18,7 +18,7 @@ Currently supported are
 
 ## Usage
 
-### 1 - Define a pojo according to the implementation requirements (they vary)
+### 1 - Define your pojos according to the implementation requirements (they vary)
 
     public static class Message {
         @Id public Long messageId;
@@ -27,13 +27,67 @@ Currently supported are
         @Indexed public long timestamp = new Date().getTime();
     }
 
-
-* A pojo **must** have
-    * At least **one field** marked with the `@Id` annotation (primary key)
-        * Only `String`, `Long`, `Integer`, `Float` and `Double` types are supported
-    * Zero or more `@Indexed` fields
-        * Same limitation as the `@Id` field: only `String`, `Long`, `Integer`, `Float` and `Double` types
-
 ### 2 - Enjoy a unified querying interface
 
+    // We create a connection to the database
+    DataService dataService = new OfyDataService();
+
+    // We create an object
+
+    Message mess = new Message();
     
+    // we start adding it to the db
+    dataService.put(mess);
+
+    // we retrieve the objects we are interested in
+
+    // we want all objects of type 'Message'
+    List<Message> messageList = dataService.getList(Message.class);
+
+    // we want objects with a with a specific field value
+    messageList = dataService.getList("author", "myself", Message.class);
+
+    // which is equivalent to
+    messageList = dataService.getList("author =", "myself", Message.class);
+    // or
+    messageList = dataService.getList("author ==", "myself", Message.class);
+
+    // but we could try
+    messageList = dataService.getList("timestamp !=", 123l, Message.class);
+    messageList = dataService.getList("timestamp >", 123l, Message.class);
+    messageList = dataService.getList("timestamp >=", 123l, Message.class);
+    messageList = dataService.getList("timestamp <=", 123l, Message.class);
+    messageList = dataService.getList("timestamp <", 123l, Message.class);
+
+    // for more generic queries with sorting
+    messageList = dataService.getList(new Query()
+          .filter("key", "value")
+          .filter("anotherKey <", 1234)
+          .orderBy("orderKey") // defaults to ascending
+          .limit(10)
+          .skip(1),Message.class);
+
+    // or with descending ordering
+    messageList = dataService.getList(new Query()
+          .filter("key", "value")
+          .filter("anotherKey <", 1234)
+          .orderBy("orderKey", OrderType.DESCENDING) // defaults to ascending
+          .limit(10)
+          .skip(1),Message.class);
+
+    // to delete an object (based on the 'id' field)
+    dataService.delete(mess);
+
+    // to delete multiple objects (based on the '_id' field)
+    dataService.deleteAll(messageList);
+
+    // to delete based on a query
+    dataService.deleteAll(new Query().filter("key", "value"), Message.class);
+    
+    // to drop all objects of a class
+    dataService.deleteAll(Message.class);
+
+    // to do count() queries
+    dataService.getResultSetSize("key", "value", Message.class);
+    dataService.getResultSetSize(new Query().filter("key", "value"), Message.class);
+    dataService.getResultSetSize(Message.class);
