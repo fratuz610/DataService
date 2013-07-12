@@ -49,6 +49,8 @@ public class Query  {
       _fieldFilterList.add(new FieldFilter(parsedFieldName, fieldValue, FieldFilterType.LOWER_THAN));
     else if(fieldName.endsWith(" <="))
       _fieldFilterList.add(new FieldFilter(parsedFieldName, fieldValue, FieldFilterType.LOWER_THAN_INC));
+    else if(fieldName.endsWith(" in"))
+      _fieldFilterList.add(new FieldFilter(parsedFieldName, fieldValue, FieldFilterType.IN));
     else
       _fieldFilterList.add(new FieldFilter(fieldName, fieldValue, FieldFilterType.EQUAL));
     
